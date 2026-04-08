@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate, login
+from django.contrib.auth import logout
 import json
 
 @csrf_exempt
@@ -38,4 +39,12 @@ def user_login(request):
         else:
             return JsonResponse({'error': 'Invalid username or password'})
 
+    return JsonResponse({'error': 'Invalid request'})
+
+@csrf_exempt
+def user_logout(request):
+    if request.method == 'POST':
+        logout(request)
+        return JsonResponse({'message': 'Logout successful'})
+    
     return JsonResponse({'error': 'Invalid request'})
