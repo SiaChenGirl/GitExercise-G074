@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout
+from .models import Profile
 import json
 
 @csrf_exempt
@@ -12,11 +13,14 @@ def register(request):
 
         username = data.get('username')
         password = data.get('password')
+        email = data.get('email')
+        gender = data.get('gender')
 
         if User.objects.filter(username=username).exists():
             return JsonResponse({'error': 'Username already exists'})
 
-        User.objects.create_user(username=username, password=password)
+        user = User.objects.create_user(username=username, password=password, email=email)
+        Profile.objects.create(user=user, gender=gender)
 
         return JsonResponse({'message': 'User created successfully'})
 
