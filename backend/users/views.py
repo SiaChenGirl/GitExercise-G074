@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
 from .models import Profile
 import json
 
@@ -52,3 +53,43 @@ def user_logout(request):
         return JsonResponse({'message': 'Logout successful'})
     
     return JsonResponse({'error': 'Invalid request'})
+
+@login_required
+def user_profile(request):
+    user = request.user
+    profile = Profile.objects.get(user=user)
+
+    return JsonResponse({
+        'username': user.username,
+        'email': user.email,
+        'gender': profile.gender
+    })
+
+@csrf_exempt
+@login_required
+def change_password(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+
+        old_password = data.get('old_password')
+        new_password = data.get('new_password')
+
+        user = request.user
+
+        if not user.check_password(old_password):
+            return JsonResponse({
+                "error": 'Old password is incorrect'
+            })
+        
+        user.set_password(new_password)
+        user.save()
+
+        return JsonResponse({
+            'message': 'Password change sucessfully.'
+        })
+    
+    return JsonResponse({
+        'error': 'Invalid request'
+    })
+        
+    
