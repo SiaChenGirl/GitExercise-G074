@@ -124,14 +124,18 @@ def add_mood(request):
         data = json.loads(request.body)
 
         mood = data.get('mood')
+        diary = data.get('diary_text')
+        intensity = data.get('intensity')
 
         MoodEntry.objects.create(
             user=request.user,
-            mood=mood
+            mood=mood,
+            diary_text=diary,
+            intensity=intensity
         )
 
         return JsonResponse({
-            'message': 'Mood saved successfully!'
+            'message': 'Mood entry saved successfully!'
         })
     
     return JsonResponse({
