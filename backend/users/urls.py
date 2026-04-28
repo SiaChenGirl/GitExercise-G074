@@ -33,4 +33,8 @@ urlpatterns = [
     ),
 
     path('verify-email/<str:username>/', views.verify_email),
+
+    path('add-mood/', views.add_mood),
+
+    path('today-mood/', views.today_mood),
 ]

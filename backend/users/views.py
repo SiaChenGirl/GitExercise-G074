@@ -4,9 +4,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
-from .models import Profile
+from .models import Profile, MoodEntry
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
+from django.utils.timezone import now
 import json
 
 @csrf_exempt
@@ -116,5 +117,43 @@ def verify_email(request, username):
         'message': 'Email verified successfully'
     })
 
+@csrf_exempt
+@login_required
+def add_mood(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+
+        mood = data.get('mood')
+
+        MoodEntry.objects.create(
+            user=request.user,
+            mood=mood
+        )
+
+        return JsonResponse({
+            'message': 'Mood saved successfully!'
+        })
+    
+    return JsonResponse({
+        'error': 'Invalid request.'
+    })
+
+@login_required
+def today_mood(request):
+    today = now().date()
+
+    latest = MoodEntry.objects.filter(
+        user=request.user,
+        created_at__date=today
+    ).order_by('-created_at').first()
+
+    if latest:
+        return JsonResponse({
+            "mood": latest.mood
+        })
+    
+    return JsonResponse({
+        "message": "No mood today. Please add a mood."
+    })
         
     
